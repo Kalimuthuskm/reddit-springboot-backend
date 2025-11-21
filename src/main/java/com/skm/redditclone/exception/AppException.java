@@ -1,14 +1,14 @@
 package com.skm.redditclone.exception;
 
+import lombok.Data;
+import lombok.Getter;
+
+@Getter
 public class AppException extends RuntimeException {
-    public AppException() {
+    private final AppErrorCode errorCode;
+    public AppException(AppErrorCode errorCode) {
+        super();
+        this.errorCode = errorCode;
     }
 
-    public AppException(String message) {
-        super(message);
-    }
-
-    public AppException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

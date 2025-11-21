@@ -22,28 +22,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody RegisterRequest request) {
-        try {
             AuthResponse response = authService.registerUser(request);
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody AuthRequest request) {
-
-        try {
-            AuthResponse response = authService.userLogin(request);
+        AuthResponse response = authService.userLogin(request);
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+
     }
 
 }

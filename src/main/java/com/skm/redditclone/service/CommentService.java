@@ -4,6 +4,8 @@ import com.skm.redditclone.dto.BulkDeleteResponse;
 import com.skm.redditclone.dto.CommentDeleteResponse;
 import com.skm.redditclone.dto.CommentRequest;
 import com.skm.redditclone.dto.CommentResponse;
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Comment;
 import com.skm.redditclone.repository.CommentRepository;
 import com.skm.redditclone.repository.PostRepository;
@@ -29,7 +31,7 @@ public class CommentService {
     public CommentResponse createComment(Long postId, CommentRequest request, Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post with id " + postId + " does not exists");
+            throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         Comment newComment = new Comment();
         newComment.setPostId(postId);
@@ -44,7 +46,7 @@ public class CommentService {
     public Page<Comment> getCommentByPostID(Long postId, Pageable pageable, Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post with id " + postId + " does not exists");
+            throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         return commentRepository.getCommentsByPostId(postId, pageable);
     }
@@ -53,7 +55,7 @@ public class CommentService {
         String username = auth.getName();
 
         if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post with id " + postId + " does not exists");
+            throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         boolean comment = commentRepository.updateComment(commentId, request.getComment());
         if (comment) {
@@ -61,14 +63,14 @@ public class CommentService {
             response.setComment("Comment updated successfully");
             return response;
         } else {
-            throw new RuntimeException("Comment not updated");
+            throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
     }
 
     public CommentDeleteResponse deleteComment(Long postId, Long commentId, Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post with id " + postId + " does not exists");
+            throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         boolean comment = commentRepository.deleteComment(commentId);
         if (comment) {

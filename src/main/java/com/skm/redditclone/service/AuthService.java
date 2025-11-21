@@ -3,6 +3,8 @@ package com.skm.redditclone.service;
 import com.skm.redditclone.dto.AuthRequest;
 import com.skm.redditclone.dto.AuthResponse;
 import com.skm.redditclone.dto.RegisterRequest;
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.UserRepository;
 import com.skm.redditclone.security.JwtService;
@@ -23,7 +25,7 @@ public class AuthService {
     public AuthResponse registerUser(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new AppException(AppErrorCode.USER_ALREADY_EXISTS);
         }
 
         User newUser = new User();
@@ -41,10 +43,10 @@ public class AuthService {
     public AuthResponse userLogin(AuthRequest request) {
 
         User user = userRepository.getUser(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new AppException(AppErrorCode.INVALID_INPUT));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new AppException(AppErrorCode.PASSWORD_MISMATCH);
         }
 
         String token = jwtService.generateToken(user.getUsername());
