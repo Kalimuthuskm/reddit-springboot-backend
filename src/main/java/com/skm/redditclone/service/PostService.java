@@ -1,6 +1,8 @@
 package com.skm.redditclone.service;
 
 import com.skm.redditclone.dto.*;
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Post;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.PostRepository;
@@ -33,7 +35,7 @@ public class PostService {
     public PostResponse createPost(PostRequest req, Authentication auth) {
         String username = getLoggedUsername(auth);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+                .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         Post post = new Post();
         post.setTitle(req.getTitle());
@@ -72,7 +74,7 @@ public class PostService {
             String message = "Post Updated Successfully";
             return new PostUpdateResponse(message);
         } else {
-            throw new RuntimeException("Post Not Updated");
+            throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
     }
 
@@ -82,7 +84,7 @@ public class PostService {
             String message = "Post Deleted Successfully";
             return new PostUpdateResponse(message);
         } else {
-            throw new RuntimeException("Post Not Deleted");
+            throw new AppException(AppErrorCode.POST_NOT_DELETED);
         }
     }
 
@@ -94,7 +96,7 @@ public class PostService {
         notFoundId.removeAll(existingIds);
 
         if (deleted == 0) {
-            throw new RuntimeException("Post not Deleted");
+            throw new AppException(AppErrorCode.POST_NOT_DELETED);
         } else {
             if (notFoundId.isEmpty()) {
                 return new BulkDeleteResponse(

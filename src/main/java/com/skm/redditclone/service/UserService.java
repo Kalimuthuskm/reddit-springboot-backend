@@ -4,7 +4,8 @@ import com.skm.redditclone.dto.UpdatePasswordRequest;
 import com.skm.redditclone.dto.UpdateUsernameRequest;
 import com.skm.redditclone.dto.UserProfileResponse;
 import com.skm.redditclone.dto.UsernameResponse;
-import com.skm.redditclone.exception.InvalidPasswordException;
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class UserService {
                                 u.getCreatedAt()
                         )
                 )
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+                .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         return userProfile;
     }
@@ -41,7 +42,7 @@ public class UserService {
         String newUsername = request.getNewUsername();
 
         if (!oldUsername.equals(currentUsername)) {
-            throw new UsernameNotFoundException("current username does not match");
+            throw new AppException(AppErrorCode.USERNAME_NOT_NOT_MATCH);
         }
         boolean updateSuccess = userRepository.updateUsername(oldUsername, newUsername);
         if (updateSuccess) {
@@ -49,7 +50,7 @@ public class UserService {
             response.setUsername(newUsername);
             return response;
         }
-        throw new UsernameNotFoundException("Username not found");
+        throw new AppException(AppErrorCode.USERNAME_NOT_FOUND);
     }
 
     public String userPasswordUpadate(Authentication auth, UpdatePasswordRequest request) {
@@ -59,10 +60,10 @@ public class UserService {
 
         String storedPass = userRepository.findPasswordByUsername(username);
         if (!passwordEncoder.matches(oldPassword, storedPass)) {
-            throw new InvalidPasswordException("Old password does not match");
+            throw new AppException(AppErrorCode.PASSWORD_NOT_MATCH);
         }
         if (passwordEncoder.matches(newPassword, storedPass)) {
-            throw new InvalidPasswordException("New password cannot be the same as the old password");
+            throw new AppException(AppErrorCode.PASSWORD_NOT_MATCH);
         }
 
         String encodePassword = passwordEncoder.encode(newPassword);
@@ -71,7 +72,7 @@ public class UserService {
         if (updateSuccess) {
             return "password updated";
         } else {
-            throw new InvalidPasswordException("Username not found or password update failed");
+            throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
 
     }

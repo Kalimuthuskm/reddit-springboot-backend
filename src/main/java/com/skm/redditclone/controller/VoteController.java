@@ -20,27 +20,19 @@ public class VoteController {
             @RequestBody VoteRequest request,
             Authentication auth
     ) {
-        try {
+
             int count = voteService.vote(postId, request, auth);
             return ResponseEntity.ok(count);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+
     }
 
     @GetMapping("")
     public ResponseEntity<?> getVote(
             @PathVariable Long postId
     ) {
-        try {
+
             int count = voteService.getVoteCount(postId);
             return ResponseEntity.ok(count);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+
     }
 }

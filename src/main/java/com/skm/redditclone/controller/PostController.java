@@ -21,73 +21,40 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody PostRequest req, Authentication auth) {
         PostResponse response = postService.createPost(req, auth);
-        try {
-            return ResponseEntity.ok().body(response);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping
     public ResponseEntity<Object> getPosts(Pageable pageable) {
         Page<PostResponse> response = postService.getPost(pageable);
-        try {
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getPost(@PathVariable Long id) {
-        try {
-            PostResponse response = postService.getPostByID(id);
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+
+        PostResponse response = postService.getPostByID(id);
+        return ResponseEntity.ok().body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updatePost(Authentication auth, @PathVariable Long id, @RequestBody PostUpdateRequest request) {
         PostUpdateResponse response = postService.updatePost(auth, id, request);
-        try {
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok().body(response);
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletePost(Authentication auth, @PathVariable Long id) {
         PostUpdateResponse response = postService.deletePostByID(id);
-        try {
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping
     public ResponseEntity<Object> bulkPostDelete(Authentication auth, @RequestBody List<Long> ids) {
-        try {
-            BulkDeleteResponse response = postService.bulkDeletePosts(ids, auth);
-            return ResponseEntity.ok().body(response);
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+        BulkDeleteResponse response = postService.bulkDeletePosts(ids, auth);
+        return ResponseEntity.ok().body(response);
+
     }
 
 }
