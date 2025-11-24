@@ -1,8 +1,5 @@
 package com.skm.redditclone.dto;
 
-import lombok.Data;
 
-@Data
-public class UsernameResponse {
-    private String username;
+public record UsernameResponse (String username){
 }
