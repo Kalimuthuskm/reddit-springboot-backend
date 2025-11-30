@@ -1,9 +1,5 @@
 package com.skm.redditclone.dto;
 
-import lombok.Data;
 
-@Data
-public class UpdatePasswordRequest {
-    private String oldPassword;
-    private String newPassword;
+public record UpdatePasswordRequest(String oldPassword, String newPassword) {
 }
