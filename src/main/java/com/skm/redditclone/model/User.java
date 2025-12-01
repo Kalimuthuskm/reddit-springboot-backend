@@ -12,7 +12,7 @@ import java.time.Instant;
 public class User {
     private Long id;
     private String username;
-    private String password; // hashed
+    private String password;
     private Instant createdAt;
 }
 
