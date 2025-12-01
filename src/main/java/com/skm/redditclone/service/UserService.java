@@ -38,16 +38,15 @@ public class UserService {
 
     public UsernameResponse updateUserName(Authentication auth, UpdateUsernameRequest request) {
         String currentUsername = auth.getName();
-        String oldUsername = request.getOldUsername();
-        String newUsername = request.getNewUsername();
+        String oldUsername = request.oldUsername();
+        String newUsername = request.newUsername();
 
         if (!oldUsername.equals(currentUsername)) {
             throw new AppException(AppErrorCode.USERNAME_NOT_NOT_MATCH);
         }
         boolean updateSuccess = userRepository.updateUsername(oldUsername, newUsername);
         if (updateSuccess) {
-            UsernameResponse response = new UsernameResponse();
-            response.setUsername(newUsername);
+            UsernameResponse response = new UsernameResponse(newUsername);
             return response;
         }
         throw new AppException(AppErrorCode.USERNAME_NOT_FOUND);
@@ -55,8 +54,8 @@ public class UserService {
 
     public String userPasswordUpadate(Authentication auth, UpdatePasswordRequest request) {
         String username = auth.getName();
-        String oldPassword = request.getOldPassword();
-        String newPassword = request.getNewPassword();
+        String oldPassword = request.oldPassword();
+        String newPassword = request.newPassword();
 
         String storedPass = userRepository.findPasswordByUsername(username);
         if (!passwordEncoder.matches(oldPassword, storedPass)) {

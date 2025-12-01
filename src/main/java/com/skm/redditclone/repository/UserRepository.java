@@ -33,6 +33,63 @@ public class UserRepository {
                 .fetchOneInto(User.class);
     }
 
+    public User createOAuthUser(User users) {
+        return dsl.insertInto(Tables.USERS)
+                .columns(
+                        Tables.USERS.USERNAME,
+                        Tables.USERS.EMAIL,
+                        Tables.USERS.OAUTH_PROVIDER,
+                        Tables.USERS.OAUTH_ID,
+                        Tables.USERS.PROFILE_IMAGE_URL,
+                        Tables.USERS.CREATED_AT
+                ).values(
+                        users.getUsername(),
+                        users.getEmail(),
+                        users.getOauthProvider(),
+                        users.getOauthId(),
+                        users.getProfileImageUrl(),
+                        LocalDateTime.now()
+                ).returning(
+                        Tables.USERS.ID,
+                        Tables.USERS.USERNAME,
+                        Tables.USERS.EMAIL,
+                        Tables.USERS.OAUTH_PROVIDER,
+                        Tables.USERS.OAUTH_ID,
+                        Tables.USERS.PROFILE_IMAGE_URL,
+                        Tables.USERS.CREATED_AT
+                ).fetchOneInto(User.class);
+    }
+
+    public Optional<User> findByOAuthProviderAndOAuthId(String provider, String oAuthid) {
+        User user = dsl
+                .select(
+                        Tables.USERS.ID,
+                        Tables.USERS.USERNAME,
+                        Tables.USERS.EMAIL,
+                        Tables.USERS.PASSWORD,
+                        Tables.USERS.OAUTH_PROVIDER,
+                        Tables.USERS.OAUTH_ID,
+                        Tables.USERS.PROFILE_IMAGE_URL,
+                        Tables.USERS.CREATED_AT
+                )
+                .from(Tables.USERS)
+                .where(Tables.USERS.OAUTH_PROVIDER.eq(provider))
+                .and(Tables.USERS.OAUTH_ID.eq(oAuthid))
+                .fetchOneInto(User.class);
+
+        return Optional.ofNullable(user);
+    }
+
+    public boolean updateOAuthUser(User user) {
+        int row = dsl.update(Tables.USERS)
+                .set(Tables.USERS.EMAIL, user.getEmail())
+                .set(Tables.USERS.PROFILE_IMAGE_URL, user.getProfileImageUrl())
+                .where(Tables.USERS.ID.eq(user.getId()))
+                .execute();
+        return row > 0;
+    }
+
+
     public Optional<User> getUser(String username) {
         User users = dsl
                 .select(

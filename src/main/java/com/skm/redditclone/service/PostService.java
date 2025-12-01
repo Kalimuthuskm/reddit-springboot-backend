@@ -38,8 +38,8 @@ public class PostService {
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         Post post = new Post();
-        post.setTitle(req.getTitle());
-        post.setContent(req.getContent());
+        post.setTitle(req.title());
+        post.setContent(req.content());
         post.setUser_id(user.getId());
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
@@ -66,8 +66,8 @@ public class PostService {
     public PostUpdateResponse updatePost(Authentication auth, Long id, PostUpdateRequest request) {
         String username = getLoggedUsername(auth);
 
-        String content = request.getContent();
-        String title = request.getTitle();
+        String content = request.content();
+        String title = request.title();
 
         boolean response = postRepository.updatePost(id, title, content);
         if (response) {

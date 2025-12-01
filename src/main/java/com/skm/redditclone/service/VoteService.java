@@ -14,7 +14,7 @@ public class VoteService {
 
     public int vote(Long postId, VoteRequest request, Authentication authentication) {
 
-        int value = request.getVoteValue();
+        int value = request.voteValue();
         String username = authentication.getName();
 
         var existing = voteRepository.getUserVote(postId, username);

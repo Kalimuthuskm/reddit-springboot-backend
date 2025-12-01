@@ -5,6 +5,10 @@ public record CommentResponse(String comment) {
     public CommentResponse(Comment savedComment) {
         this(savedComment.getComment());
     }
+
+    public void comment(String commentUpdatedSuccessfully) {
+
+    }
 }
 
 

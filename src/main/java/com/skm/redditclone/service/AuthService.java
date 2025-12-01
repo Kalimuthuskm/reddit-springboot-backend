@@ -24,13 +24,13 @@ public class AuthService {
 
     public AuthResponse registerUser(RegisterRequest request) {
 
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.username())) {
             throw new AppException(AppErrorCode.USER_ALREADY_EXISTS);
         }
 
         User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setUsername(request.username());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setCreatedAt(Instant.now());
 
         User savedUser = userRepository.createUser(newUser);
@@ -42,10 +42,10 @@ public class AuthService {
 
     public AuthResponse userLogin(AuthRequest request) {
 
-        User user = userRepository.getUser(request.getUsername())
+        User user = userRepository.getUser(request.username())
                 .orElseThrow(() -> new AppException(AppErrorCode.INVALID_INPUT));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AppException(AppErrorCode.PASSWORD_MISMATCH);
         }
 

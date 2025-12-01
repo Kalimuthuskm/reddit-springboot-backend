@@ -36,7 +36,7 @@ public class CommentService {
         Comment newComment = new Comment();
         newComment.setPostId(postId);
         newComment.setUsername(username);
-        newComment.setComment(request.getComment());
+        newComment.setComment(request.comment());
         newComment.setCreatedAt(Instant.now());
         newComment.setUpdatedAt(Instant.now());
         Comment savedComment = commentRepository.createComment(newComment);
@@ -57,11 +57,9 @@ public class CommentService {
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
-        boolean comment = commentRepository.updateComment(commentId, request.getComment());
+        boolean comment = commentRepository.updateComment(commentId, request.comment());
         if (comment) {
-            CommentResponse response = new CommentResponse();
-            response.setComment("Comment updated successfully");
-            return response;
+            return new CommentResponse("Comment updated successfully");
         } else {
             throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
@@ -74,13 +72,13 @@ public class CommentService {
         }
         boolean comment = commentRepository.deleteComment(commentId);
         if (comment) {
-            CommentDeleteResponse response = new CommentDeleteResponse();
-            response.setMessage("Comment deleted successfully");
-            return response;
+            return new CommentDeleteResponse("Comment deleted successfully");
         } else {
             throw new RuntimeException("Comment not deleted");
         }
     }
+
+
 
     public BulkDeleteResponse bulkDeleteComments(Long postId, List<Long> commentIds, Authentication auth) {
         List<Long> exitingCommentIds = commentRepository.findExistingIds(commentIds);
