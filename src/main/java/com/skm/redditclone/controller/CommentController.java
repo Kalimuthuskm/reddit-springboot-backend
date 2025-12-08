@@ -1,9 +1,6 @@
 package com.skm.redditclone.controller;
 
-import com.skm.redditclone.dto.BulkDeleteResponse;
-import com.skm.redditclone.dto.CommentDeleteResponse;
-import com.skm.redditclone.dto.CommentRequest;
-import com.skm.redditclone.dto.CommentResponse;
+import com.skm.redditclone.dto.*;
 import com.skm.redditclone.model.Comment;
 import com.skm.redditclone.service.CommentService;
 import com.skm.redditclone.service.PostService;
@@ -41,14 +38,14 @@ public class CommentController {
     @PutMapping("/{commentId}")
     public ResponseEntity<?> updateComment(@PathVariable Long postId, Long commentId, CommentRequest request, Authentication auth) {
 
-        CommentResponse response = commentService.updateComment(postId, commentId, request, auth);
+        CommentUpdateResponse response = commentService.updateComment(postId, commentId, request, auth);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long postId, @PathVariable Long commentId, Authentication auth) {
-        CommentDeleteResponse response = commentService.deleteComment(postId, commentId, auth);
-        return ResponseEntity.ok(response);
+         commentService.deleteComment(postId, commentId, auth);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping()

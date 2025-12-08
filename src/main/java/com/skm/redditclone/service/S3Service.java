@@ -1,5 +1,7 @@
 package com.skm.redditclone.service;
 
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +15,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class S3Service {
 
     private final S3Client s3Client;
@@ -48,8 +50,8 @@ public class S3Service {
             return s3Key;
 
         } catch (S3Exception e) {
-            log.error("Error uploading file to S3: {}", e.getMessage());
-            throw new RuntimeException("Failed to upload file to S3", e);
+            log.error("Error uploading file to S3: {}", e);
+            throw new AppException(AppErrorCode.FILE_UPLOAD_FAILED);
         }
     }
 

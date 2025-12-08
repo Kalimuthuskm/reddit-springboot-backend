@@ -14,13 +14,12 @@ import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/files")
 @RestController
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;
 
-    @PostMapping("/upload")
+    @PostMapping("/api/files/upload")
     public ResponseEntity<FileUploadResponse> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "description", required = false) String description,
@@ -32,7 +31,7 @@ public class FileUploadController {
     }
 
 
-    @GetMapping
+    @GetMapping("/api/files")
     public ResponseEntity<Page<FileUploadResponse>> getUserFiles(
             Pageable pageable,
             Authentication auth
@@ -42,7 +41,7 @@ public class FileUploadController {
     }
 
 
-    @GetMapping("/{fileId}")
+    @GetMapping("/api/files/{fileId}")
     public ResponseEntity<FileUploadResponse> getFileById(
             @PathVariable Long fileId,
             Authentication auth
@@ -52,13 +51,7 @@ public class FileUploadController {
     }
 
 
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<List<FileUploadResponse>> getPostFiles(
-            @PathVariable Long postId
-    ) {
-        List<FileUploadResponse> files = fileUploadService.getPostFiles(postId);
-        return ResponseEntity.ok(files);
-    }
+
 
     @DeleteMapping("/{fileId}")
     public ResponseEntity<String> deleteFile(

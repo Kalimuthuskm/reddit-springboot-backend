@@ -2,7 +2,9 @@ package com.skm.redditclone.repository;
 
 import com.skm.Tables;
 import com.skm.redditclone.model.FileUpload;
+import com.skm.tables.records.FileUploadsRecord;
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.data.domain.Page;
@@ -13,101 +15,68 @@ import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+
 @RequiredArgsConstructor
+@Repository
 public class FileUploadRepository {
 
     private final DSLContext dsl;
 
     public FileUpload save(FileUpload fileUpload) {
-        Record record = dsl.insertInto(Tables.FILE_UPLOADS)
-                .columns(
-                        Tables.FILE_UPLOADS.USER_ID,
-                        Tables.FILE_UPLOADS.ORIGINAL_NAME,
-                        Tables.FILE_UPLOADS.STORED_NAME,
-                        Tables.FILE_UPLOADS.FILE_SIZE,
-                        Tables.FILE_UPLOADS.CONTENT_TYPE,
-                        Tables.FILE_UPLOADS.S3_KEY,
-                        Tables.FILE_UPLOADS.S3_URL,
-                        Tables.FILE_UPLOADS.DESCRIPTION,
-                        Tables.FILE_UPLOADS.POST_ID,
-                        Tables.FILE_UPLOADS.UPLOADED_AT
-                )
-                .values(
-                        fileUpload.getUserId(),
-                        fileUpload.getOriginalName(),
-                        fileUpload.getStoredName(),
-                        fileUpload.getFileSize(),
-                        fileUpload.getContentType(),
-                        fileUpload.getS3Key(),
-                        fileUpload.getS3Url(),
-                        fileUpload.getDescription(),
-                        fileUpload.getPostId(),
-                        LocalDateTime.now()
-                )
-                .returning(
-                        Tables.FILE_UPLOADS.ID,
-                        Tables.FILE_UPLOADS.UPLOADED_AT
-                )
-                .fetchOne();
+        FileUploadsRecord record = dsl.newRecord(Tables.FILE_UPLOADS);
+              record.setUserId(fileUpload.getUserId());
+              record.setOriginalName(fileUpload.getOriginalName());
+              record.setStoredName(fileUpload.getStoredName());
+              record.setFileSize(fileUpload.getFileSize());
+              record.setContentType(fileUpload.getContentType());
+              record.setS3Key(fileUpload.getS3Key());
+              record.setS3Url(fileUpload.getS3Url());
+              record.setDescription(fileUpload.getDescription());
+              record.setUploadedAt(LocalDateTime.now());
+              record.store();
 
-        assert record != null;
-        fileUpload.setId(record.get(Tables.FILE_UPLOADS.ID, Long.class));
-        fileUpload.setUploadedAt(record.get(Tables.FILE_UPLOADS.UPLOADED_AT, Instant.class));
-
+        fileUpload.setId(record.getId());
+        fileUpload.setUploadedAt(record.getUploadedAt());
         return fileUpload;
     }
 
     public Optional<FileUpload> findById(Long id) {
-        Record record = dsl.select()
-                .from(Tables.FILE_UPLOADS)
+        return dsl.selectFrom(Tables.FILE_UPLOADS)
                 .where(Tables.FILE_UPLOADS.ID.eq(id))
-                .fetchOne();
-
-        if (record == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(mapToFileUpload(record));
+                .fetchOptional()
+                .map(this::mapToFileUpload);
     }
 
     public Optional<FileUpload> findByStoredName(String storedName) {
-        Record record = dsl.select()
-                .from(Tables.FILE_UPLOADS)
+        Optional<FileUpload> fileUpload = dsl.selectFrom(Tables.FILE_UPLOADS)
                 .where(Tables.FILE_UPLOADS.STORED_NAME.eq(storedName))
-                .fetchOne();
+                .fetchOptional()
+                .map(this::mapToFileUpload);
+        return fileUpload;
 
-        if (record == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(mapToFileUpload(record));
     }
 
     public Page<FileUpload> findByUserId(Long userId, Pageable pageable) {
-        List<FileUpload> files = dsl.select()
-                .from(Tables.FILE_UPLOADS)
-                .where(Tables.FILE_UPLOADS.USER_ID.eq(userId))
+        Condition condition = Tables.FILE_UPLOADS.USER_ID.eq(userId);
+
+        List<FileUpload> fileUploadList = dsl.selectFrom(Tables.FILE_UPLOADS)
+                .where(condition)
                 .orderBy(Tables.FILE_UPLOADS.UPLOADED_AT.desc())
                 .limit(pageable.getPageSize())
-                .offset((int) pageable.getOffset())
+                .offset(pageable.getOffset())
                 .fetch()
                 .map(this::mapToFileUpload);
-
-        int total = dsl.fetchCount(
-                dsl.selectFrom(Tables.FILE_UPLOADS)
-                        .where(Tables.FILE_UPLOADS.USER_ID.eq(userId))
-        );
-
-        return new PageImpl<>(files, pageable, total);
+        int total = dsl.fetchCount(dsl.selectFrom(Tables.FILE_UPLOADS)
+                .where(condition));
+        return new PageImpl<>(fileUploadList, pageable, total);
     }
 
     public List<FileUpload> findByPostId(Long postId) {
-        return dsl.select()
-                .from(Tables.FILE_UPLOADS)
+        return dsl.selectFrom(Tables.FILE_UPLOADS)
                 .where(Tables.FILE_UPLOADS.POST_ID.eq(postId))
                 .fetch()
                 .map(this::mapToFileUpload);
@@ -120,21 +89,19 @@ public class FileUploadRepository {
         return rows > 0;
     }
 
-    private FileUpload mapToFileUpload(Record record) {
-        Timestamp uploadedTs = record.get(Tables.FILE_UPLOADS.UPLOADED_AT, Timestamp.class);
-
+    private FileUpload mapToFileUpload(FileUploadsRecord record) {
         return new FileUpload(
-                record.get(Tables.FILE_UPLOADS.ID, Long.class),
-                record.get(Tables.FILE_UPLOADS.USER_ID, Long.class),
-                record.get(Tables.FILE_UPLOADS.ORIGINAL_NAME, String.class),
-                record.get(Tables.FILE_UPLOADS.STORED_NAME, String.class),
-                record.get(Tables.FILE_UPLOADS.FILE_SIZE, Long.class),
-                record.get(Tables.FILE_UPLOADS.CONTENT_TYPE, String.class),
-                record.get(Tables.FILE_UPLOADS.S3_KEY, String.class),
-                record.get(Tables.FILE_UPLOADS.S3_URL, String.class),
-                record.get(Tables.FILE_UPLOADS.DESCRIPTION, String.class),
-                uploadedTs != null ? uploadedTs.toInstant() : null,
-                record.get(Tables.FILE_UPLOADS.POST_ID, Long.class)
-        );
+                        record.getId(),
+                        record.getUserId(),
+                        record.getOriginalName(),
+                        record.getStoredName(),
+                        record.getFileSize(),
+                        record.getContentType(),
+                        record.getS3Key(),
+                        record.getS3Url(),
+                        record.getDescription(),
+                record.getUploadedAt(),
+                record.getPostId()
+                );
     }
 }

@@ -1,7 +1,8 @@
 package com.skm.redditclone.dto;
 
 import com.skm.redditclone.model.FileUpload;
-import java.time.Instant;
+
+import java.time.LocalTime;
 
 public record FileUploadResponse(
         Long id,
@@ -11,7 +12,8 @@ public record FileUploadResponse(
         String contentType,
         String s3Url,
         String description,
-        Instant uploadedAt
+        Long postId,
+        LocalTime uploadedAt
 ) {
     public FileUploadResponse(FileUpload fileUpload) {
         this(
@@ -22,7 +24,8 @@ public record FileUploadResponse(
                 fileUpload.getContentType(),
                 fileUpload.getS3Url(),
                 fileUpload.getDescription(),
-                fileUpload.getUploadedAt()
+                fileUpload.getPostId(),
+                fileUpload.getUploadedAt() !=null ?fileUpload.getUploadedAt().toLocalTime() :null
         );
     }
 }

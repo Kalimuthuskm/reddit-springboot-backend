@@ -1,6 +1,7 @@
 package com.skm.redditclone.controller;
 
 import com.skm.redditclone.dto.*;
+import com.skm.redditclone.service.FileUploadService;
 import com.skm.redditclone.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final FileUploadService fileUploadService;
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody PostRequest req, Authentication auth) {
@@ -57,5 +59,12 @@ public class PostController {
 
     }
 
+    @GetMapping("/api/files/post/{postId}")
+    public ResponseEntity<List<FileUploadResponse>> getPostFiles(
+            @PathVariable Long postId
+    ) {
+        List<FileUploadResponse> files = fileUploadService.getPostFiles(postId);
+        return ResponseEntity.ok(files);
+    }
 }
 

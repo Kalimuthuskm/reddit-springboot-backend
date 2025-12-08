@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class FileUploadService {
         fileUpload.setS3Url(s3Url);
         fileUpload.setDescription(description);
         fileUpload.setPostId(postId);
-        fileUpload.setUploadedAt(Instant.now());
+        fileUpload.setUploadedAt(LocalDateTime.now());
 
         FileUpload savedFile = fileUploadRepository.save(fileUpload);
 
@@ -95,7 +96,7 @@ public class FileUploadService {
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         FileUpload fileUpload = fileUploadRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("File not found"));
+                .orElseThrow(() -> new AppException(AppErrorCode.FILE_NOT_FOUND));
 
 
         if (!fileUpload.getUserId().equals(user.getId())) {
@@ -142,11 +143,11 @@ public class FileUploadService {
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new RuntimeException("File size exceeds maximum limit of 10MB");
+            throw new AppException(AppErrorCode.FILE_SIZE_LIMIT_EXCEEDED);
         }
 
         if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
-            throw new RuntimeException("File type not allowed. Allowed types: images, PDF, videos");
+            throw new AppException(AppErrorCode.FILE_FORMAT_NOT_ACCEPTABLE);
         }
     }
 }

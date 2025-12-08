@@ -1,9 +1,6 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.BulkDeleteResponse;
-import com.skm.redditclone.dto.CommentDeleteResponse;
-import com.skm.redditclone.dto.CommentRequest;
-import com.skm.redditclone.dto.CommentResponse;
+import com.skm.redditclone.dto.*;
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Comment;
@@ -51,7 +48,7 @@ public class CommentService {
         return commentRepository.getCommentsByPostId(postId, pageable);
     }
 
-    public CommentResponse updateComment(Long postId, Long commentId, CommentRequest request, Authentication auth) {
+    public CommentUpdateResponse updateComment(Long postId, Long commentId, CommentRequest request, Authentication auth) {
         String username = auth.getName();
 
         if (!postRepository.existsById(postId)) {
@@ -59,7 +56,7 @@ public class CommentService {
         }
         boolean comment = commentRepository.updateComment(commentId, request.comment());
         if (comment) {
-            return new CommentResponse("Comment updated successfully");
+            return new CommentUpdateResponse("Comment updated successfully");
         } else {
             throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
@@ -74,7 +71,7 @@ public class CommentService {
         if (comment) {
             return new CommentDeleteResponse("Comment deleted successfully");
         } else {
-            throw new RuntimeException("Comment not deleted");
+          throw  new AppException(AppErrorCode.COMMENT_NOT_DELETED);
         }
     }
 

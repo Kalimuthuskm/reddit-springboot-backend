@@ -12,8 +12,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/redirect}")
