@@ -48,18 +48,16 @@ public class CommentService {
         return commentRepository.getCommentsByPostId(postId, pageable);
     }
 
-    public CommentUpdateResponse updateComment(Long postId, Long commentId, CommentRequest request, Authentication auth) {
+    public void updateComment(Long postId, Long commentId, CommentRequest request, Authentication auth) {
         String username = auth.getName();
 
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         boolean comment = commentRepository.updateComment(commentId, request.comment());
-        if (comment) {
-            return new CommentUpdateResponse("");
-        } else {
-            throw new AppException(AppErrorCode.UPDATE_FAILED);
-        }
+       if (!comment) {
+           throw new AppException(AppErrorCode.POST_NOT_EXISTS);
+       }
     }
 
     public void deleteComment(Long postId, Long commentId, Authentication auth) {
