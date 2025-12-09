@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class FileUploadService {
 
     private final S3Service s3Service;

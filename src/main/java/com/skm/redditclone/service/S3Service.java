@@ -27,24 +27,15 @@ public class S3Service {
 
     public String uploadFile(MultipartFile file, String folder) throws IOException {
         String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : "";
+        String extension = originalFilename != null && originalFilename.contains(".") ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
 
         String uniqueFilename = UUID.randomUUID().toString() + extension;
         String s3Key = folder + "/" + uniqueFilename;
 
         try {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(s3Key)
-                    .contentType(file.getContentType())
-                    .build();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(s3Key).contentType(file.getContentType()).build();
 
-            s3Client.putObject(
-                    putObjectRequest,
-                    RequestBody.fromBytes(file.getBytes())
-            );
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
             log.info("File uploaded successfully to S3: {}", s3Key);
             return s3Key;
@@ -63,27 +54,21 @@ public class S3Service {
 
     public void deleteFile(String s3Key) {
         try {
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(s3Key)
-                    .build();
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucketName).key(s3Key).build();
 
             s3Client.deleteObject(deleteObjectRequest);
             log.info("File deleted successfully from S3: {}", s3Key);
 
         } catch (S3Exception e) {
             log.error("Error deleting file from S3: {}", e.getMessage());
-            throw new RuntimeException("Failed to delete file from S3", e);
+            throw new AppException(AppErrorCode.S3_FILE_NOT_DELETED);
         }
     }
 
 
     public boolean fileExists(String s3Key) {
         try {
-            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(s3Key)
-                    .build();
+            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder().bucket(bucketName).key(s3Key).build();
 
             s3Client.headObject(headObjectRequest);
             return true;
@@ -92,7 +77,7 @@ public class S3Service {
             return false;
         } catch (S3Exception e) {
             log.error("Error checking file existence in S3: {}", e.getMessage());
-            throw new RuntimeException("Failed to check file existence", e);
+            throw new AppException(AppErrorCode.FAILED_TO_CHECK_EXISTS);
         }
     }
 }

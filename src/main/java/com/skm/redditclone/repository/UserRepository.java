@@ -2,6 +2,7 @@ package com.skm.redditclone.repository;
 
 import com.skm.Tables;
 import com.skm.redditclone.model.User;
+import com.skm.tables.records.UsersRecord;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -34,30 +35,19 @@ public class UserRepository {
     }
 
     public User createOAuthUser(User users) {
-        return dsl.insertInto(Tables.USERS)
-                .columns(
-                        Tables.USERS.USERNAME,
-                        Tables.USERS.EMAIL,
-                        Tables.USERS.OAUTH_PROVIDER,
-                        Tables.USERS.OAUTH_ID,
-                        Tables.USERS.PROFILE_IMAGE_URL,
-                        Tables.USERS.CREATED_AT
-                ).values(
-                        users.getUsername(),
-                        users.getEmail(),
-                        users.getOauthProvider(),
-                        users.getOauthId(),
-                        users.getProfileImageUrl(),
-                        LocalDateTime.now()
-                ).returning(
-                        Tables.USERS.ID,
-                        Tables.USERS.USERNAME,
-                        Tables.USERS.EMAIL,
-                        Tables.USERS.OAUTH_PROVIDER,
-                        Tables.USERS.OAUTH_ID,
-                        Tables.USERS.PROFILE_IMAGE_URL,
-                        Tables.USERS.CREATED_AT
-                ).fetchOneInto(User.class);
+        UsersRecord record = dsl.newRecord(Tables.USERS);
+        record.setUsername(users.getUsername());
+        record.setPassword(users.getPassword());
+        record.setEmail(users.getEmail());
+        record.setOauthProvider(users.getOauthProvider());
+        record.setOauthId(users.getOauthId());
+        record.setProfileImageUrl(users.getProfileImageUrl());
+        record.setCreatedAt(LocalDateTime.now());
+        record.store();
+
+        users.setId(record.getId());
+        users.setUsername(record.getUsername());
+        return users;
     }
 
     public Optional<User> findByOAuthProviderAndOAuthId(String provider, String oAuthid) {

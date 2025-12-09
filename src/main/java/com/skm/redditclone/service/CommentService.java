@@ -56,20 +56,20 @@ public class CommentService {
         }
         boolean comment = commentRepository.updateComment(commentId, request.comment());
         if (comment) {
-            return new CommentUpdateResponse("Comment updated successfully");
+            return new CommentUpdateResponse("");
         } else {
             throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
     }
 
-    public CommentDeleteResponse deleteComment(Long postId, Long commentId, Authentication auth) {
+    public void deleteComment(Long postId, Long commentId, Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         boolean comment = commentRepository.deleteComment(commentId);
         if (comment) {
-            return new CommentDeleteResponse("Comment deleted successfully");
+          return;
         } else {
           throw  new AppException(AppErrorCode.COMMENT_NOT_DELETED);
         }

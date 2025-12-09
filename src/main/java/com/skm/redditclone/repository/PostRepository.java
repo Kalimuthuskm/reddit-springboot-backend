@@ -1,7 +1,10 @@
 package com.skm.redditclone.repository;
 
 import com.skm.Tables;
+import com.skm.redditclone.exception.AppErrorCode;
+import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Post;
+import com.skm.tables.records.PostsRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -24,25 +27,13 @@ public class PostRepository {
     private final DSLContext dsl;
 
     public Post createPost(Post post) {
-        Record record = dsl
-                .insertInto(Tables.POSTS)
-                .columns(Tables.POSTS.TITLE,
-                        Tables.POSTS.CONTENT,
-                        Tables.POSTS.USER_ID,
-                        Tables.POSTS.CREATED_AT,
-                        Tables.POSTS.UPDATED_AT)
-                .values(post.getTitle(),
-                        post.getContent(),
-                        post.getUser_id(),
-                        LocalDateTime.now(),
-                        LocalDateTime.now()).
-                returning(
-                        Tables.POSTS.ID,
-                        Tables.POSTS.TITLE,
-                        Tables.POSTS.CREATED_AT,
-                        Tables.POSTS.UPDATED_AT).fetchOne();
+        PostsRecord record =dsl.newRecord(Tables.POSTS);
+        record.setTitle(post.getTitle());
+        record.setContent(post.getContent());
+        record.setUserId(post.getUser_id());
+        record.setUpdatedAt(LocalDateTime.now());
+        record.setCreatedAt(LocalDateTime.now());
 
-        assert record != null;
         post.setId(record.get(Tables.POSTS.ID,Long.class));
         post.setCreatedAt(record.get(Tables.POSTS.CREATED_AT,Instant.class));
         post.setUpdatedAt(record.get(Tables.POSTS.UPDATED_AT,Instant.class));
@@ -56,7 +47,7 @@ public class PostRepository {
                 .where(Tables.POSTS.ID.eq(id)).fetchOne();
 
         if (r == null) {
-            throw new RuntimeException("Post Not Found");
+            throw new AppException(AppErrorCode.POST_NOT_FOUND);
         }
 
         return new Post(

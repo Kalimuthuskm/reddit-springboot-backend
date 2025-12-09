@@ -23,8 +23,7 @@ public class VoteRepository {
 
     public Optional<Vote> getUserVote(Long postId, String username) {
 
-        Record r = dsl.select()
-                .from(Tables.VOTES)
+        Record r = dsl.selectFrom(Tables.VOTES)
                 .where(Tables.VOTES.POST_ID.eq(postId)
                         .and(Tables.VOTES.USER_NAME.eq(username)))
                 .fetchOne();

@@ -1,7 +1,9 @@
 package com.skm.redditclone.repository;
 
+import com.skm.Tables;
 import com.skm.redditclone.model.Comment;
 import com.skm.tables.Comments;
+import com.skm.tables.records.CommentsRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -30,37 +32,24 @@ public class CommentRepository {
     public Comment createComment(Comment comment) {
         Timestamp now = Timestamp.from(now());
 
-        var r = dsl.insertInto(COMMENTS)
-                .columns(COMMENTS.POST_ID,
-                        COMMENTS.USERNAME,
-                        COMMENTS.COMMENT,
-                        COMMENTS.CREATED_AT,
-                        COMMENTS.UPDATED_AT
-                ).values(comment.getPostId(),
-                        comment.getUsername(),
-                        comment.getComment(),
-                        now.toLocalDateTime(), now.toLocalDateTime())
-                .returning(COMMENTS.ID,
-                        COMMENTS.CREATED_AT,
-                        COMMENTS.UPDATED_AT
-                ).fetchOne();
 
+        CommentsRecord record = dsl.newRecord(Tables.COMMENTS);
+        record.setPostId(comment.getPostId());
+        record.setUsername(comment.getUsername());
+        record.setComment(comment.getComment());
+        record.setCreatedAt(now.toLocalDateTime());
+        record.setUpdatedAt(now.toLocalDateTime());
+        record.store();
 
-        assert r != null;
-        comment.setId(r.get("id", Long.class));
-        comment.setCreatedAt(r.get("created_at", Timestamp.class).toInstant());
-        comment.setUpdatedAt(r.get("updated_at", Timestamp.class).toInstant());
-
+        comment.setId(record.get("id", Long.class));
+        comment.setCreatedAt(record.get("created_at", Timestamp.class).toInstant());
+        comment.setUpdatedAt(record.get("updated_at", Timestamp.class).toInstant());
         return comment;
     }
 
-
     public Optional<Comment> getCommentById(Long id) {
 
-        Record r = dsl.select().
-                from(COMMENTS)
-                .where(field(Comments.COMMENTS.ID).eq(id))
-                .fetchOne();
+        Record r = dsl.selectFrom(COMMENTS).where(field(Comments.COMMENTS.ID).eq(id)).fetchOne();
 
         if (r == null) return Optional.empty();
 
@@ -72,13 +61,7 @@ public class CommentRepository {
 
     public Page<Comment> getCommentsByPostId(Long postId, Pageable pageable) {
 
-        List<Comment> comments = dsl.select()
-                .from(COMMENTS)
-                .where(field(COMMENTS.POST_ID).eq(postId))
-                .orderBy(field(COMMENTS.CREATED_AT).asc())
-                .limit(pageable.getPageSize()).offset((int) pageable.getOffset())
-                .fetch()
-                .map(r -> new Comment(r.get("id", Long.class), r.get("post_id", Long.class), r.get("username", String.class), r.get("comment", String.class), r.get("created_at", Timestamp.class).toInstant(), r.get("updated_at", Timestamp.class).toInstant()));
+        List<Comment> comments = dsl.selectFrom(COMMENTS).where(field(COMMENTS.POST_ID).eq(postId)).orderBy(field(COMMENTS.CREATED_AT).asc()).limit(pageable.getPageSize()).offset((int) pageable.getOffset()).fetch().map(r -> new Comment(r.get("id", Long.class), r.get("post_id", Long.class), r.get("username", String.class), r.get("comment", String.class), r.get("created_at", Timestamp.class).toInstant(), r.get("updated_at", Timestamp.class).toInstant()));
 
         int total = dsl.fetchCount(dsl.selectFrom(COMMENTS).where(field(COMMENTS.POST_ID).eq(postId)));
 
@@ -86,33 +69,24 @@ public class CommentRepository {
     }
 
     public boolean updateComment(Long id, String comment) {
-        int rows = dsl.update(COMMENTS)
-                .set(field(COMMENTS.COMMENT), comment)
-                .set(field(COMMENTS.UPDATED_AT), LocalDateTime.now())
-                .where(field(COMMENTS.ID).eq(id)).execute();
+        int rows = dsl.update(COMMENTS).set(field(COMMENTS.COMMENT), comment).set(field(COMMENTS.UPDATED_AT), LocalDateTime.now()).where(field(COMMENTS.ID).eq(id)).execute();
         return rows > 0;
     }
 
 
     public boolean deleteComment(Long id) {
 
-        int rows = dsl.deleteFrom(COMMENTS)
-                .where(field(COMMENTS.ID).eq(id)).execute();
+        int rows = dsl.deleteFrom(COMMENTS).where(field(COMMENTS.ID).eq(id)).execute();
 
         return rows > 0;
     }
 
     public int bulkDeletePosts(List<Long> ids) {
-        return dsl.deleteFrom(COMMENTS)
-                .where(DSL.field(COMMENTS.ID).in(ids))
-                .execute();
+        return dsl.deleteFrom(COMMENTS).where(DSL.field(COMMENTS.ID).in(ids)).execute();
     }
 
     public List<Long> findExistingIds(List<Long> ids) {
-        return dsl.select(COMMENTS.ID)
-                .from(COMMENTS)
-                .where(field(COMMENTS.ID).in(ids))
-                .fetchInto(Long.class);
+        return dsl.select(COMMENTS.ID).from(COMMENTS).where(field(COMMENTS.ID).in(ids)).fetchInto(Long.class);
     }
 }
 
