@@ -1,6 +1,10 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.*;
+import com.skm.redditclone.dto.request.PostRequest;
+import com.skm.redditclone.dto.request.PostUpdateRequest;
+import com.skm.redditclone.dto.response.BulkDeleteResponse;
+import com.skm.redditclone.dto.response.PostResponse;
+import com.skm.redditclone.dto.response.PostUpdateResponse;
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Post;
@@ -14,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,11 +36,11 @@ public class PostService {
         return ((UserDetails) auth.getPrincipal()).getUsername();
     }
 
-    // Create new post
     public PostResponse createPost(PostRequest req, Authentication auth) {
         String username = getLoggedUsername(auth);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
+                .orElseThrow(() ->
+                        new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         Post post = new Post();
         post.setTitle(req.title());
@@ -63,7 +68,10 @@ public class PostService {
         return new PostResponse(post);
     }
 
-    public PostUpdateResponse updatePost(Authentication auth, Long id, PostUpdateRequest request) {
+    @Transactional
+    public PostUpdateResponse updatePost(Authentication auth,
+                                         Long id,
+                                         PostUpdateRequest request) {
         String username = getLoggedUsername(auth);
 
         String content = request.content();
@@ -78,6 +86,7 @@ public class PostService {
         }
     }
 
+    @Transactional
     public PostUpdateResponse deletePostByID(Long id) {
         boolean response = postRepository.deletePost(id);
         if (response) {
@@ -88,7 +97,9 @@ public class PostService {
         }
     }
 
-    public BulkDeleteResponse bulkDeletePosts(List<Long> ids, Authentication auth) {
+    @Transactional
+    public BulkDeleteResponse bulkDeletePosts(List<Long> ids,
+                                              Authentication auth) {
         List<Long> existingIds = postRepository.findExistingIds(ids);
 
         int deleted = postRepository.bulkDeletePosts(existingIds);
@@ -100,10 +111,13 @@ public class PostService {
         } else {
             if (notFoundId.isEmpty()) {
                 return new BulkDeleteResponse(
-                        deleted, Collections.emptyList());
+                        deleted,
+                        Collections.emptyList()
+                );
             } else {
                 return new BulkDeleteResponse(
-                        deleted, notFoundId
+                        deleted,
+                        notFoundId
                 );
             }
         }

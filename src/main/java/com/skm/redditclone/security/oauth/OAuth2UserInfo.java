@@ -2,7 +2,6 @@ package com.skm.redditclone.security.oauth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import java.util.Map;
 
 @Data

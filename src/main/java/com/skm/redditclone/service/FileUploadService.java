@@ -1,6 +1,6 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.FileUploadResponse;
+import com.skm.redditclone.dto.response.FileUploadResponse;
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.FileUpload;
@@ -13,10 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -39,9 +38,7 @@ public class FileUploadService {
             "video/mp4",
             "video/mpeg"
     );
-
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     public FileUploadResponse uploadFile(
             MultipartFile file,
@@ -54,12 +51,9 @@ public class FileUploadService {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
-
-
         String folder = "uploads/" + user.getId();
         String s3Key = s3Service.uploadFile(file, folder);
         String s3Url = s3Service.getFileUrl(s3Key);
-
 
         FileUpload fileUpload = new FileUpload();
         fileUpload.setUserId(user.getId());
@@ -79,7 +73,6 @@ public class FileUploadService {
         return new FileUploadResponse(savedFile);
     }
 
-
     public Page<FileUploadResponse> getUserFiles(Authentication auth, Pageable pageable) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
@@ -98,7 +91,6 @@ public class FileUploadService {
         FileUpload fileUpload = fileUploadRepository.findById(fileId)
                 .orElseThrow(() -> new AppException(AppErrorCode.FILE_NOT_FOUND));
 
-
         if (!fileUpload.getUserId().equals(user.getId())) {
             throw new AppException(AppErrorCode.FORBIDDEN);
         }
@@ -113,29 +105,22 @@ public class FileUploadService {
                 .toList();
     }
 
-
     public void deleteFile(Long fileId, Authentication auth) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
 
         FileUpload fileUpload = fileUploadRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("File not found"));
-
+                .orElseThrow(() -> new AppException(AppErrorCode.FILE_NOT_FOUND));
 
         if (!fileUpload.getUserId().equals(user.getId())) {
             throw new AppException(AppErrorCode.FORBIDDEN);
         }
 
-
         s3Service.deleteFile(fileUpload.getS3Key());
-
-        // Delete from database
         fileUploadRepository.deleteById(fileId);
-
         log.info("File deleted successfully: {} by user: {}", fileId, username);
     }
-
 
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {

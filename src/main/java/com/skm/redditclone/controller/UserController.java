@@ -1,9 +1,8 @@
 package com.skm.redditclone.controller;
 
-import com.skm.redditclone.dto.UpdatePasswordRequest;
-import com.skm.redditclone.dto.UpdateUsernameRequest;
-import com.skm.redditclone.dto.UserProfileResponse;
-import com.skm.redditclone.repository.UserRepository;
+import com.skm.redditclone.dto.request.UpdatePasswordRequest;
+import com.skm.redditclone.dto.response.UpdateUsernameRequest;
+import com.skm.redditclone.dto.response.UserProfileResponse;
 import com.skm.redditclone.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 @RestController
 public class UserController {
+
     private final UserService userService;
-    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<?> getUsers(Authentication auth) {
@@ -25,19 +24,17 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> updateName(Authentication auth, @RequestBody UpdateUsernameRequest request) {
+    public ResponseEntity<?> updateName(Authentication auth,
+                                        @RequestBody UpdateUsernameRequest request) {
 
         userService.updateUserName(auth, request);
-
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("update-password")
-    public ResponseEntity<?> updatePassword(Authentication auth, @RequestBody UpdatePasswordRequest request) {
+    public ResponseEntity<?> updatePassword(Authentication auth,
+                                            @RequestBody UpdatePasswordRequest request) {
         String responce = userService.updateUserPassword(auth, request);
-
-        return ResponseEntity.ok()
-                .body(responce);
-
+        return ResponseEntity.ok().body(responce);
     }
 }

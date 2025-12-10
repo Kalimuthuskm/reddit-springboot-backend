@@ -9,7 +9,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -25,11 +24,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             HttpServletResponse response,
             AuthenticationException exception
     ) throws IOException, ServletException {
-
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
                 .queryParam("error", exception.getLocalizedMessage())
                 .build().toUriString();
-
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

@@ -1,4 +1,4 @@
-package com.skm.redditclone.dto;
+package com.skm.redditclone.dto.response;
 
 import com.skm.redditclone.model.Post;
 

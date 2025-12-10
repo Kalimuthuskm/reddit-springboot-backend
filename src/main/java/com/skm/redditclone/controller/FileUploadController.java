@@ -1,6 +1,6 @@
 package com.skm.redditclone.controller;
 
-import com.skm.redditclone.dto.FileUploadResponse;
+import com.skm.redditclone.dto.response.FileUploadResponse;
 import com.skm.redditclone.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -9,9 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.util.List;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -30,7 +29,6 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/api/files")
     public ResponseEntity<Page<FileUploadResponse>> getUserFiles(
             Pageable pageable,
@@ -40,7 +38,6 @@ public class FileUploadController {
         return ResponseEntity.ok(files);
     }
 
-
     @GetMapping("/api/files/{fileId}")
     public ResponseEntity<FileUploadResponse> getFileById(
             @PathVariable Long fileId,
@@ -49,9 +46,6 @@ public class FileUploadController {
         FileUploadResponse response = fileUploadService.getFileById(fileId, auth);
         return ResponseEntity.ok(response);
     }
-
-
-
 
     @DeleteMapping("/{fileId}")
     public ResponseEntity<String> deleteFile(

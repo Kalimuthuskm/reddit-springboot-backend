@@ -1,7 +1,6 @@
 package com.skm.redditclone.controller;
 
-import com.skm.redditclone.dto.ErrorResponse;
-import com.skm.redditclone.dto.VoteRequest;
+import com.skm.redditclone.dto.request.VoteRequest;
 import com.skm.redditclone.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/{postId}/votes")
 @RestController
 public class VoteController {
+
     private final VoteService voteService;
 
     @PostMapping("")
@@ -20,7 +20,6 @@ public class VoteController {
             @RequestBody VoteRequest request,
             Authentication auth
     ) {
-
             int count = voteService.vote(postId, request, auth);
             return ResponseEntity.ok(count);
 
@@ -30,9 +29,7 @@ public class VoteController {
     public ResponseEntity<?> getVote(
             @PathVariable Long postId
     ) {
-
             int count = voteService.getVoteCount(postId);
             return ResponseEntity.ok(count);
-
     }
 }

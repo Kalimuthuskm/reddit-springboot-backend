@@ -1,17 +1,19 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.VoteRequest;
+import com.skm.redditclone.dto.request.VoteRequest;
 import com.skm.redditclone.model.Vote;
 import com.skm.redditclone.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class VoteService {
     private final VoteRepository voteRepository;
 
+    @Transactional
     public int vote(Long postId, VoteRequest request, Authentication authentication) {
 
         int value = request.voteValue();
@@ -37,5 +39,4 @@ public class VoteService {
     public int getVoteCount(Long postId) {
         return voteRepository.countVotes(postId);
     }
-
 }

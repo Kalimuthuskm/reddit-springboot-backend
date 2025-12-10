@@ -1,6 +1,7 @@
-package com.skm.redditclone.dto;
+package com.skm.redditclone.dto.response;
 
 import com.skm.redditclone.model.FileUpload;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalTime;
 
@@ -15,7 +16,7 @@ public record FileUploadResponse(
         Long postId,
         LocalTime uploadedAt
 ) {
-    public FileUploadResponse(FileUpload fileUpload) {
+    public FileUploadResponse(@NotNull FileUpload fileUpload) {
         this(
                 fileUpload.getId(),
                 fileUpload.getOriginalName(),

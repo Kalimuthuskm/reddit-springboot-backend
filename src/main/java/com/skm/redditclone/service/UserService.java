@@ -1,8 +1,8 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.UpdatePasswordRequest;
-import com.skm.redditclone.dto.UpdateUsernameRequest;
-import com.skm.redditclone.dto.UserProfileResponse;
+import com.skm.redditclone.dto.request.UpdatePasswordRequest;
+import com.skm.redditclone.dto.response.UpdateUsernameRequest;
+import com.skm.redditclone.dto.response.UserProfileResponse;
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.User;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -34,7 +35,9 @@ public class UserService {
         return userProfile;
     }
 
-    public void updateUserName(Authentication auth, UpdateUsernameRequest request) {
+    @Transactional
+    public void updateUserName(Authentication auth,
+                               UpdateUsernameRequest request) {
         String currentUsername = auth.getName();
         String oldUsername = request.oldUsername();
         String newUsername = request.newUsername();
@@ -48,7 +51,9 @@ public class UserService {
         }
     }
 
-    public String updateUserPassword(Authentication auth, UpdatePasswordRequest request) {
+    @Transactional
+    public String updateUserPassword(Authentication auth,
+                                     UpdatePasswordRequest request) {
         String username = auth.getName();
         String oldPassword = request.oldPassword();
         String newPassword = request.newPassword();
@@ -69,6 +74,5 @@ public class UserService {
         } else {
             throw new AppException(AppErrorCode.UPDATE_FAILED);
         }
-
     }
 }

@@ -34,14 +34,10 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
-                // Must ENABLE CORS
                 .cors(cors -> cors.configure(http))
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
@@ -49,7 +45,6 @@ public class SecurityConfig {
                             response.getWriter().write("{\"error\":\"Unauthorized or token invalid\"}");
                         })
                 )
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
@@ -65,11 +60,8 @@ public class SecurityConfig {
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
-
                 .authenticationProvider(authenticationProvider())
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

@@ -1,6 +1,8 @@
 package com.skm.redditclone.service;
 
-import com.skm.redditclone.dto.*;
+import com.skm.redditclone.dto.request.CommentRequest;
+import com.skm.redditclone.dto.response.BulkDeleteResponse;
+import com.skm.redditclone.dto.response.CommentResponse;
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.Comment;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,7 +28,9 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-    public CommentResponse createComment(Long postId, CommentRequest request, Authentication auth) {
+    public CommentResponse createComment(Long postId,
+                                         CommentRequest request,
+                                         Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
@@ -40,7 +45,9 @@ public class CommentService {
         return new CommentResponse(savedComment);
     }
 
-    public Page<Comment> getCommentByPostID(Long postId, Pageable pageable, Authentication auth) {
+    public Page<Comment> getCommentByPostID(Long postId,
+                                            Pageable pageable,
+                                            Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
@@ -48,7 +55,11 @@ public class CommentService {
         return commentRepository.getCommentsByPostId(postId, pageable);
     }
 
-    public void updateComment(Long postId, Long commentId, CommentRequest request, Authentication auth) {
+    @Transactional
+    public void updateComment(Long postId,
+                              Long commentId,
+                              CommentRequest request,
+                              Authentication auth) {
         String username = auth.getName();
 
         if (!postRepository.existsById(postId)) {
@@ -60,22 +71,24 @@ public class CommentService {
        }
     }
 
-    public void deleteComment(Long postId, Long commentId, Authentication auth) {
+    @Transactional
+    public void deleteComment(Long postId,
+                              Long commentId,
+                              Authentication auth) {
         String username = auth.getName();
         if (!postRepository.existsById(postId)) {
             throw new AppException(AppErrorCode.POST_NOT_EXISTS);
         }
         boolean comment = commentRepository.deleteComment(commentId);
-        if (comment) {
-          return;
-        } else {
+        if (!comment) {
           throw  new AppException(AppErrorCode.COMMENT_NOT_DELETED);
         }
     }
 
-
-
-    public BulkDeleteResponse bulkDeleteComments(Long postId, List<Long> commentIds, Authentication auth) {
+    @Transactional
+    public BulkDeleteResponse bulkDeleteComments(Long postId,
+                                                 List<Long> commentIds,
+                                                 Authentication auth) {
         List<Long> exitingCommentIds = commentRepository.findExistingIds(commentIds);
         int deleted = commentRepository.bulkDeletePosts(exitingCommentIds);
         List<Long> notFound = new ArrayList<>();
@@ -94,7 +107,5 @@ public class CommentService {
                 );
             }
         }
-
-
     }
 }

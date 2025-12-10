@@ -1,7 +1,6 @@
 package com.skm.redditclone.exception;
 
-import com.skm.redditclone.dto.ErrorResponse;
-import org.springframework.http.HttpStatus;
+import com.skm.redditclone.dto.response.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

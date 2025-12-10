@@ -12,13 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.jooq.impl.DSL.field;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,7 +30,6 @@ public class PostRepository {
         record.setUserId(post.getUser_id());
         record.setUpdatedAt(LocalDateTime.now());
         record.setCreatedAt(LocalDateTime.now());
-
         post.setId(record.get(Tables.POSTS.ID,Long.class));
         post.setCreatedAt(record.get(Tables.POSTS.CREATED_AT,Instant.class));
         post.setUpdatedAt(record.get(Tables.POSTS.UPDATED_AT,Instant.class));
@@ -42,9 +38,9 @@ public class PostRepository {
 
     public Post findById(Long id) {
         Record r = dsl
-                .select()
-                .from(Tables.POSTS)
-                .where(Tables.POSTS.ID.eq(id)).fetchOne();
+                .selectFrom(Tables.POSTS)
+                .where(Tables.POSTS.ID.eq(id))
+                .fetchOne();
 
         if (r == null) {
             throw new AppException(AppErrorCode.POST_NOT_FOUND);
@@ -83,14 +79,13 @@ public class PostRepository {
                                 r.get(Tables.POSTS.CREATED_AT, Instant.class),
                                 r.get(Tables.POSTS.UPDATED_AT, Instant.class)));
 
-        // Total number of posts in the table (for total pages)
         int total = dsl.fetchCount(Tables.POSTS);
-
         return new PageImpl<>(posts, pageable, total);
     }
 
-
-    public boolean updatePost(Long postId, String title, String content) {
+    public boolean updatePost(Long postId,
+                              String title,
+                              String content) {
 
         int rows = dsl.update(Tables.POSTS)
                 .set(Tables.POSTS.TITLE, title)
@@ -98,16 +93,13 @@ public class PostRepository {
                 .set(Tables.POSTS.UPDATED_AT, LocalDateTime.now())
                 .where(Tables.POSTS.ID.eq(postId))
                 .execute();
-
         return rows > 0;
     }
-
 
     public boolean deletePost(Long postId) {
         int rows = dsl.deleteFrom(Tables.POSTS)
                 .where(Tables.POSTS.ID.eq(postId))
                 .execute();
-
         return rows > 0;
     }
 

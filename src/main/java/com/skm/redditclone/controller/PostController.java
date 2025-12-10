@@ -1,6 +1,11 @@
 package com.skm.redditclone.controller;
 
-import com.skm.redditclone.dto.*;
+import com.skm.redditclone.dto.request.PostRequest;
+import com.skm.redditclone.dto.request.PostUpdateRequest;
+import com.skm.redditclone.dto.response.BulkDeleteResponse;
+import com.skm.redditclone.dto.response.FileUploadResponse;
+import com.skm.redditclone.dto.response.PostResponse;
+import com.skm.redditclone.dto.response.PostUpdateResponse;
 import com.skm.redditclone.service.FileUploadService;
 import com.skm.redditclone.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +26,8 @@ public class PostController {
     private final FileUploadService fileUploadService;
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody PostRequest req, Authentication auth) {
+    public ResponseEntity<Object> create(@RequestBody PostRequest req,
+                                         Authentication auth) {
         PostResponse response = postService.createPost(req, auth);
         return ResponseEntity.ok().body(response);
     }
@@ -40,29 +46,31 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updatePost(Authentication auth, @PathVariable Long id, @RequestBody PostUpdateRequest request) {
+    public ResponseEntity<Object> updatePost(Authentication auth,
+                                             @PathVariable Long id,
+                                             @RequestBody PostUpdateRequest request) {
         PostUpdateResponse response = postService.updatePost(auth, id, request);
         return ResponseEntity.ok().body(response);
 
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletePost(Authentication auth, @PathVariable Long id) {
+    public ResponseEntity<Object> deletePost(Authentication auth,
+                                             @PathVariable Long id) {
         PostUpdateResponse response = postService.deletePostByID(id);
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping
-    public ResponseEntity<Object> bulkPostDelete(Authentication auth, @RequestBody List<Long> ids) {
+    public ResponseEntity<Object> bulkPostDelete(Authentication auth,
+                                                 @RequestBody List<Long> ids) {
         BulkDeleteResponse response = postService.bulkDeletePosts(ids, auth);
         return ResponseEntity.ok().body(response);
 
     }
 
     @GetMapping("/api/files/post/{postId}")
-    public ResponseEntity<List<FileUploadResponse>> getPostFiles(
-            @PathVariable Long postId
-    ) {
+    public ResponseEntity<List<FileUploadResponse>> getPostFiles(@PathVariable Long postId) {
         List<FileUploadResponse> files = fileUploadService.getPostFiles(postId);
         return ResponseEntity.ok(files);
     }
