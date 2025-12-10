@@ -4,11 +4,14 @@ import com.skm.redditclone.dto.request.UpdatePasswordRequest;
 import com.skm.redditclone.dto.response.UpdateUsernameRequest;
 import com.skm.redditclone.dto.response.UserProfileResponse;
 import com.skm.redditclone.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 @RestController
@@ -25,7 +28,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> updateName(Authentication auth,
-                                        @RequestBody UpdateUsernameRequest request) {
+                                        @Valid @RequestBody UpdateUsernameRequest request) {
 
         userService.updateUserName(auth, request);
         return ResponseEntity.ok().build();
@@ -33,7 +36,7 @@ public class UserController {
 
     @PostMapping("update-password")
     public ResponseEntity<?> updatePassword(Authentication auth,
-                                            @RequestBody UpdatePasswordRequest request) {
+                                            @Valid @RequestBody UpdatePasswordRequest request) {
         String responce = userService.updateUserPassword(auth, request);
         return ResponseEntity.ok().body(responce);
     }

@@ -1,3 +1,5 @@
 package com.skm.redditclone.dto.request;
 
-public record VoteRequest (Integer voteValue){}
+import jakarta.validation.constraints.NotNull;
+
+public record VoteRequest (@NotNull Integer voteValue){}

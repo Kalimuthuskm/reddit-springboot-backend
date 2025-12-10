@@ -11,7 +11,11 @@ import com.skm.redditclone.model.Post;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.PostRepository;
 import com.skm.redditclone.repository.UserRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,14 +23,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Service
+@Validated
 @RequiredArgsConstructor
+@Service
 public class PostService {
 
     private final PostRepository postRepository;
@@ -36,7 +42,8 @@ public class PostService {
         return ((UserDetails) auth.getPrincipal()).getUsername();
     }
 
-    public PostResponse createPost(PostRequest req, Authentication auth) {
+    public PostResponse createPost(@Valid @NotNull PostRequest req,
+                                   Authentication auth) {
         String username = getLoggedUsername(auth);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
@@ -63,15 +70,15 @@ public class PostService {
         return new PageImpl<>(responses, pageable, posts.getTotalElements());
     }
 
-    public PostResponse getPostByID(Long id) {
+    public PostResponse getPostByID(@NotNull @Positive Long id) {
         Post post = postRepository.findById(id);
         return new PostResponse(post);
     }
 
     @Transactional
     public PostUpdateResponse updatePost(Authentication auth,
-                                         Long id,
-                                         PostUpdateRequest request) {
+                                         @NotNull @Positive Long id,
+                                         @Valid @NotNull PostUpdateRequest request) {
         String username = getLoggedUsername(auth);
 
         String content = request.content();
@@ -87,7 +94,8 @@ public class PostService {
     }
 
     @Transactional
-    public PostUpdateResponse deletePostByID(Long id) {
+    public PostUpdateResponse deletePostByID(Authentication auth,
+                                             @NotNull @Positive Long id) {
         boolean response = postRepository.deletePost(id);
         if (response) {
             String message = "Post Deleted Successfully";
@@ -98,7 +106,7 @@ public class PostService {
     }
 
     @Transactional
-    public BulkDeleteResponse bulkDeletePosts(List<Long> ids,
+    public BulkDeleteResponse bulkDeletePosts(@NotNull @Size(min = 1) List<Long> ids,
                                               Authentication auth) {
         List<Long> existingIds = postRepository.findExistingIds(ids);
 

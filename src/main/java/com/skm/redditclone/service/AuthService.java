@@ -8,21 +8,25 @@ import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.UserRepository;
 import com.skm.redditclone.security.JwtService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 
-@Service
+@Validated
 @RequiredArgsConstructor
+@Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthResponse registerUser(RegisterRequest request) {
+    public AuthResponse registerUser(@Valid @NotNull RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.username())) {
             throw new AppException(AppErrorCode.USER_ALREADY_EXISTS);
@@ -36,7 +40,7 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-    public AuthResponse userLogin(AuthRequest request) {
+    public AuthResponse userLogin(@Valid @NotNull AuthRequest request) {
         User user = userRepository.getUser(request.username())
                 .orElseThrow(() -> new AppException(AppErrorCode.INVALID_INPUT));
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {

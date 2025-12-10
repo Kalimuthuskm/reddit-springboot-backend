@@ -1,4 +1,6 @@
 package com.skm.redditclone.dto.request;
 
-public record PostRequest (String title,
-                           String content){}
+import jakarta.validation.constraints.NotBlank;
+
+public record PostRequest (@NotBlank String title,
+                           @NotBlank String content){}

@@ -7,19 +7,22 @@ import com.skm.redditclone.model.FileUpload;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.FileUploadRepository;
 import com.skm.redditclone.repository.UserRepository;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+@Validated
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -83,7 +86,7 @@ public class FileUploadService {
     }
 
 
-    public FileUploadResponse getFileById(Long fileId, Authentication auth) {
+    public FileUploadResponse getFileById(@NotNull @Positive Long fileId, Authentication auth) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
@@ -98,14 +101,14 @@ public class FileUploadService {
         return new FileUploadResponse(fileUpload);
     }
 
-    public List<FileUploadResponse> getPostFiles(Long postId) {
+    public List<FileUploadResponse> getPostFiles(@NotNull @Positive Long postId) {
         List<FileUpload> files = fileUploadRepository.findByPostId(postId);
         return files.stream()
                 .map(FileUploadResponse::new)
                 .toList();
     }
 
-    public void deleteFile(Long fileId, Authentication auth) {
+    public void deleteFile(@NotNull @Positive Long fileId, Authentication auth) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(AppErrorCode.USERNAME_NOT_FOUND));
@@ -122,7 +125,7 @@ public class FileUploadService {
         log.info("File deleted successfully: {} by user: {}", fileId, username);
     }
 
-    private void validateFile(MultipartFile file) {
+    private void validateFile(@NotNull MultipartFile file) {
         if (file.isEmpty()) {
             throw new AppException(AppErrorCode.INVALID_INPUT);
         }

@@ -2,6 +2,10 @@ package com.skm.redditclone.controller;
 
 import com.skm.redditclone.dto.response.FileUploadResponse;
 import com.skm.redditclone.service.FileUploadService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +24,9 @@ public class FileUploadController {
 
     @PostMapping("/api/files/upload")
     public ResponseEntity<FileUploadResponse> uploadFile(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "postId", required = false) Long postId,
+             @NotNull @RequestParam("file") MultipartFile file,
+             @RequestParam(value = "description", required = false) String description,
+            @Positive @RequestParam(value = "postId", required = false) Long postId,
             Authentication auth
     ) throws IOException {
         FileUploadResponse response = fileUploadService.uploadFile(file, description, postId, auth);
@@ -40,7 +44,7 @@ public class FileUploadController {
 
     @GetMapping("/api/files/{fileId}")
     public ResponseEntity<FileUploadResponse> getFileById(
-            @PathVariable Long fileId,
+            @PathVariable @NotNull @Positive Long fileId,
             Authentication auth
     ) {
         FileUploadResponse response = fileUploadService.getFileById(fileId, auth);
@@ -49,7 +53,7 @@ public class FileUploadController {
 
     @DeleteMapping("/{fileId}")
     public ResponseEntity<String> deleteFile(
-            @PathVariable Long fileId,
+            @PathVariable  @NotNull @Positive Long fileId,
             Authentication auth
     ) {
         fileUploadService.deleteFile(fileId, auth);

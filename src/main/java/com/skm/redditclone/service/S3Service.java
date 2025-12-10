@@ -2,8 +2,10 @@ package com.skm.redditclone.service;
 
 import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +25,7 @@ public class S3Service {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file, String folder) throws IOException {
+    public String uploadFile(@NotNull MultipartFile file,@NotBlank String folder) throws IOException {
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename != null &&
                 originalFilename.contains(".") ? originalFilename
@@ -48,11 +50,11 @@ public class S3Service {
         }
     }
 
-    public String getFileUrl(String s3Key) {
+    public String getFileUrl(@NotBlank String s3Key) {
         return String.format("https://%s.s3.amazonaws.com/%s", bucketName, s3Key);
     }
 
-    public void deleteFile(String s3Key) {
+    public void deleteFile(@NotBlank String s3Key) {
         try {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.
                     builder()
@@ -68,7 +70,7 @@ public class S3Service {
         }
     }
 
-    public boolean fileExists(String s3Key) {
+    public boolean fileExists(@NotBlank String s3Key) {
         try {
             HeadObjectRequest headObjectRequest = HeadObjectRequest
                     .builder()

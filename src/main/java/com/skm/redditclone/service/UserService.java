@@ -7,16 +7,20 @@ import com.skm.redditclone.exception.AppErrorCode;
 import com.skm.redditclone.exception.AppException;
 import com.skm.redditclone.model.User;
 import com.skm.redditclone.repository.UserRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
-@Service
+@Validated
 @RequiredArgsConstructor
+@Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -37,7 +41,7 @@ public class UserService {
 
     @Transactional
     public void updateUserName(Authentication auth,
-                               UpdateUsernameRequest request) {
+                             @Valid @NotNull UpdateUsernameRequest request) {
         String currentUsername = auth.getName();
         String oldUsername = request.oldUsername();
         String newUsername = request.newUsername();
@@ -53,7 +57,7 @@ public class UserService {
 
     @Transactional
     public String updateUserPassword(Authentication auth,
-                                     UpdatePasswordRequest request) {
+                                     @Valid @NotNull UpdatePasswordRequest request) {
         String username = auth.getName();
         String oldPassword = request.oldPassword();
         String newPassword = request.newPassword();
