@@ -1,0 +1,62 @@
+package com.skm.redditclone.controller;
+
+import com.skm.redditclone.dto.response.FileUploadResponse;
+import com.skm.redditclone.service.FileUploadService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+
+
+@RequiredArgsConstructor
+@RestController
+public class FileUploadController {
+
+    private final FileUploadService fileUploadService;
+
+    @PostMapping("/api/files/upload")
+    public ResponseEntity<FileUploadResponse> uploadFile(
+             @NotNull @RequestParam("file") MultipartFile file,
+             @RequestParam(value = "description", required = false) String description,
+            @Positive @RequestParam(value = "postId", required = false) Long postId,
+            Authentication auth
+    ) throws IOException {
+        FileUploadResponse response = fileUploadService.uploadFile(file, description, postId, auth);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/files")
+    public ResponseEntity<Page<FileUploadResponse>> getUserFiles(
+            Pageable pageable,
+            Authentication auth
+    ) {
+        Page<FileUploadResponse> files = fileUploadService.getUserFiles(auth, pageable);
+        return ResponseEntity.ok(files);
+    }
+
+    @GetMapping("/api/files/{fileId}")
+    public ResponseEntity<FileUploadResponse> getFileById(
+            @PathVariable @NotNull @Positive Long fileId,
+            Authentication auth
+    ) {
+        FileUploadResponse response = fileUploadService.getFileById(fileId, auth);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{fileId}")
+    public ResponseEntity<String> deleteFile(
+            @PathVariable  @NotNull @Positive Long fileId,
+            Authentication auth
+    ) {
+        fileUploadService.deleteFile(fileId, auth);
+        return ResponseEntity.ok("File deleted successfully");
+    }
+}

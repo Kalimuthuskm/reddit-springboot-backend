@@ -6,12 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.stereotype.Repository;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 import static org.jooq.impl.DSL.*;
 
 @Repository
@@ -20,11 +18,9 @@ public class VoteRepository {
 
     private final DSLContext dsl;
 
-
     public Optional<Vote> getUserVote(Long postId, String username) {
 
-        Record r = dsl.select()
-                .from(Tables.VOTES)
+        Record r = dsl.selectFrom(Tables.VOTES)
                 .where(Tables.VOTES.POST_ID.eq(postId)
                         .and(Tables.VOTES.USER_NAME.eq(username)))
                 .fetchOne();
@@ -41,12 +37,10 @@ public class VoteRepository {
                 r.get(Tables.VOTES.VOTE_VALUE, Integer.class),
                 createdAt
         );
-
         return Optional.of(vote);
     }
 
     public Vote addVote(Vote vote) {
-
         Record r = dsl.insertInto(Tables.VOTES)
                 .columns(
                         Tables.VOTES.POST_ID,
@@ -68,10 +62,8 @@ public class VoteRepository {
         vote.setId(r.get(Tables.VOTES.ID, Long.class));
         Timestamp ts = r.get(Tables.VOTES.CREATED_AT, Timestamp.class);
         vote.setCreatedAt(ts != null ? ts.toInstant() : null);
-
         return vote;
     }
-
 
     public boolean updateVote(Long id, int value) {
         int rows = dsl.update(Tables.VOTES)
@@ -81,7 +73,6 @@ public class VoteRepository {
         return rows > 0;
     }
 
-
     public boolean deleteVote(Long id) {
         int rows = dsl.deleteFrom(Tables.VOTES)
                 .where(Tables.VOTES.ID.eq(id))
@@ -89,14 +80,12 @@ public class VoteRepository {
         return rows > 0;
     }
 
-
     public int countVotes(Long postId) {
         Integer sum = dsl
                 .select(sum(Tables.VOTES.VOTE_VALUE))
                 .from(Tables.VOTES)
                 .where(Tables.VOTES.POST_ID.eq(postId))
                 .fetchOneInto(Integer.class);
-
         return sum == null ? 0 : sum;
     }
 }
