@@ -13,6 +13,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -50,6 +52,7 @@ public class CommentService {
         return new CommentResponse(savedComment);
     }
 
+    @Cacheable(value = "comments",key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<Comment> getCommentByPostID(@NotNull @Positive Long postId,
                                             Pageable pageable,
                                            Authentication auth) {
@@ -61,6 +64,7 @@ public class CommentService {
     }
 
     @Transactional
+    @CacheEvict(value="comments",allEntries=true)
     public void updateComment(@NotNull @Positive Long postId,
                               @NotNull @Positive Long commentId,
                               @Valid @NotNull CommentRequest request,
@@ -77,6 +81,7 @@ public class CommentService {
     }
 
     @Transactional
+    @CacheEvict(value="comments",allEntries=true)
     public void deleteComment(@NotNull @Positive Long postId,
                               @NotNull @Positive Long commentId,
                               Authentication auth) {

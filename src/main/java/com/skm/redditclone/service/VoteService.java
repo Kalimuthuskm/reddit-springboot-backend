@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ public class VoteService {
     private final VoteRepository voteRepository;
 
     @Transactional
+    @CacheEvict(value = "votes" ,key="#postId")
     public int vote(@NonNull @Positive Long postId,
                     @Valid @NotNull VoteRequest request,
                     Authentication authentication) {
@@ -43,7 +46,7 @@ public class VoteService {
         }
         return voteRepository.countVotes(postId);
     }
-
+    @Cacheable(value = "votes",key = "#postId")
     public int getVoteCount(@NotNull @Positive Long postId) {
         return voteRepository.countVotes(postId);
     }

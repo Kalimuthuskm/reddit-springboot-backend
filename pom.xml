@@ -130,11 +130,33 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>13.0</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Spring cache support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <!-- Spring Data Redis (Lettuce) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Jackson (if not present) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

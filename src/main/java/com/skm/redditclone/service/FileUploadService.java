@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -76,6 +78,7 @@ public class FileUploadService {
         return new FileUploadResponse(savedFile);
     }
 
+    @Cacheable(value = "files",key = "#auth.name + '-' +#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<FileUploadResponse> getUserFiles(Authentication auth, Pageable pageable) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
@@ -85,7 +88,7 @@ public class FileUploadService {
         return files.map(FileUploadResponse::new);
     }
 
-
+    @Cacheable(value = "files",key = "#fileId")
     public FileUploadResponse getFileById(@NotNull @Positive Long fileId, Authentication auth) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
@@ -100,7 +103,7 @@ public class FileUploadService {
 
         return new FileUploadResponse(fileUpload);
     }
-
+    @Cacheable(value = "files_post",key = "#postId")
     public List<FileUploadResponse> getPostFiles(@NotNull @Positive Long postId) {
         List<FileUpload> files = fileUploadRepository.findByPostId(postId);
         return files.stream()
@@ -108,6 +111,7 @@ public class FileUploadService {
                 .toList();
     }
 
+    @CacheEvict(value = "files", key = "#fileId")
     public void deleteFile(@NotNull @Positive Long fileId, Authentication auth) {
         String username = auth.getName();
         User user = userRepository.findByUsername(username)

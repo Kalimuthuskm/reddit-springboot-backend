@@ -16,6 +16,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +62,7 @@ public class PostService {
         return new PostResponse(saved);
     }
 
+    @Cacheable(value = "posts_page", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<PostResponse> getPost(Pageable pageable) {
         Page<Post> posts = postRepository.findAll(pageable);
 
@@ -69,13 +72,14 @@ public class PostService {
                 .toList();
         return new PageImpl<>(responses, pageable, posts.getTotalElements());
     }
-
+    @Cacheable(value = "posts", key = "#id")
     public PostResponse getPostByID(@NotNull @Positive Long id) {
         Post post = postRepository.findById(id);
         return new PostResponse(post);
     }
 
     @Transactional
+    @CacheEvict(value = "posts", key = "#id")
     public PostUpdateResponse updatePost(Authentication auth,
                                          @NotNull @Positive Long id,
                                          @Valid @NotNull PostUpdateRequest request) {
@@ -94,6 +98,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "posts", key = "#id")
     public PostUpdateResponse deletePostByID(Authentication auth,
                                              @NotNull @Positive Long id) {
         boolean response = postRepository.deletePost(id);

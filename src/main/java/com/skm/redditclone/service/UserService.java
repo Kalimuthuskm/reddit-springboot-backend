@@ -10,6 +10,8 @@ import com.skm.redditclone.repository.UserRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Cacheable(value = "userProfiles", key = "#auth.name")
     public UserProfileResponse getUser(Authentication auth) {
         String username = auth.getName();
         Optional<User> user = userRepository.findByUsername(username);
@@ -40,6 +43,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "userProfiles", key = "#auth.name")
     public void updateUserName(Authentication auth,
                              @Valid @NotNull UpdateUsernameRequest request) {
         String currentUsername = auth.getName();
@@ -56,6 +60,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "userProfiles", key = "#auth.name")
     public String updateUserPassword(Authentication auth,
                                      @Valid @NotNull UpdatePasswordRequest request) {
         String username = auth.getName();
